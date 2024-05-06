@@ -90,8 +90,16 @@ public class ProtocoloCliente {
 				break;
 				
 			case 8:
-
+				String inputResponse = (String) lectorObjetos.readObject();
+				if(inputResponse.equalsIgnoreCase("OK")) {
+					byte[] consultaCifrada = Cifrado.cifrarPKCS5(keys[0], iv, String.valueOf(numToComunicate));
+					escritor.writeObject(consultaCifrada);
+					String hMac = HMac.doHMac(keys[1], String.valueOf(numToComunicate));
+					escritor.writeObject(hMac); 
+				}
+				estado++;
 				break;
+				
 			case 9:
 
 				break;

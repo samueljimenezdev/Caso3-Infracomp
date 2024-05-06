@@ -28,6 +28,8 @@ public class ProtocoloServidor {
             byte[] passCifrado = null;
             String password = "pass";
             byte[] iv = null;
+            byte[] consultaCifrada = null;
+            
             
 			
 			while(estado <= 8 && estado != -1) {
@@ -89,13 +91,28 @@ public class ProtocoloServidor {
 					passCifrado = (byte[]) lector.readObject();
 					String loginDescifrado = Cifrado.descifrarPKCS5(keys[0], iv, loginCifrado);
 					String passDescifrado = Cifrado.descifrarPKCS5(keys[0], iv, passCifrado);
+					if(loginDescifrado.equalsIgnoreCase(login) && passDescifrado.equalsIgnoreCase(password)) {
+						escritorObjetos.writeObject("OK");
+					}else {
+						escritorObjetos.writeObject("ERROR");
+					}
 					estado++;
 					break;
+					
 				case 7:
-
+					consultaCifrada = (byte[]) lector.readObject();
+					estado++;
 					break;
+					
 				case 8:
-
+					String hMacConsulta = (String) lector.readObject();
+					String consultaDescifrada = Cifrado.descifrarPKCS5(keys[0], iv, consultaCifrada);
+					String hMac = HMac.doHMac(keys[1], consultaDescifrada);
+					
+					if(hMac.equalsIgnoreCase(hMacConsulta)) {
+						System.out.println("CORRECTA VERIFICACION HMAC");
+					}
+					estado++;
 					break;
 				}
 				
