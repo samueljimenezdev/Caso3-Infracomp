@@ -34,7 +34,7 @@ public class Servidor extends Thread{
         KeyPair keyPair = generator.generateKeyPair();
         this.publica = keyPair.getPublic();
         this.privada = keyPair.getPrivate();
-        this.x = random.nextInt(16);
+        this.x = random.nextInt(15);
 	}
 	
 	public PublicKey getPublica() {
@@ -46,7 +46,11 @@ public class Servidor extends Thread{
 	}
 	
     public BigInteger generarDatosGX(BigInteger p, BigInteger g) {
-        return g.pow(this.x);
+        return g.pow(this.x).mod(p);
+    }
+    
+    public BigInteger calcularK(BigInteger gy, BigInteger  p) {
+    	return gy.pow(this.x).mod(p);
     }
 	
 	public void run() {

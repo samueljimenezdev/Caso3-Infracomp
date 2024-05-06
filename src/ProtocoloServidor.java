@@ -12,18 +12,18 @@ import java.security.SignatureException;
 
 public class ProtocoloServidor {
 
-	public static void procesar(Socket stkServer, Servidor servidor) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException{
-			DataInputStream lector;
+	public static void procesar(Socket stkServer, Servidor servidor) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, ClassNotFoundException{
 			int estado = 1;
-	        DataOutputStream escritor = new DataOutputStream(stkServer.getOutputStream());
-            //ObjectInputStream lectorObjetos = new ObjectInputStream(stkServer.getInputStream());
+            ObjectInputStream lector = new ObjectInputStream(stkServer.getInputStream());
             ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkServer.getOutputStream());
+            BigInteger p = null;
 			
 			while(estado <= 8 && estado != -1) {
+				
 				switch (estado){
+				
 				case 1:
-					lector = new DataInputStream(stkServer.getInputStream());
-					String inputLine = lector.readUTF();
+					String inputLine = (String) lector.readObject();
 					String[] data = inputLine.split(",");
 					byte[] retoFirmado = Firmas.firmarSHA256(data[1], servidor.getPrivada());
 					escritorObjetos.writeObject(retoFirmado);
@@ -31,14 +31,13 @@ public class ProtocoloServidor {
 					break;
 					
 				case 2:
-					lector = new DataInputStream(stkServer.getInputStream());
-					inputLine = lector.readUTF();
+					inputLine = (String) lector.readObject();
 					if(inputLine.equalsIgnoreCase("OK")) {
 						
 	                    BigInteger g = DHParameters.getG();
 	                    escritorObjetos.writeObject(g);
 	                    
-	                    BigInteger p = DHParameters.getP();
+	                    p = DHParameters.getP();
 	                    escritorObjetos.writeObject(p);
 	                    
 	                    BigInteger gx = servidor.generarDatosGX(p, g);
@@ -54,10 +53,19 @@ public class ProtocoloServidor {
 					break;
 					
 				case 3:
-
+					inputLine = (String) lector.readObject();
+					if(inputLine.equalsIgnoreCase("OK")) {
+					System.out.println("Llego bien");
+					estado++;
+					}	
+					//TODO: Cerrar con error
 					break;
+					
 				case 4:
-
+					BigInteger gy = (BigInteger) lector.readObject();
+					BigInteger k = servidor.calcularK(gy, p);
+					System.out.println("El k es en el sv: " + k);
+					estado++;
 					break;
 				case 5:
 
@@ -74,7 +82,6 @@ public class ProtocoloServidor {
 				}
 				
 			}
-			escritor.close();
 			//lector.close();
 			//lectorObjetos.close();
 			escritorObjetos.close();	

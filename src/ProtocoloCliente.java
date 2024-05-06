@@ -12,30 +12,34 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.util.Random;
 
 public class ProtocoloCliente {
 
 	public static void procesar(int numToComunicate, ThreadCliente cliente, Socket stkCliente)
 			throws IOException, ClassNotFoundException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+		
 		int estado = 1;
-        DataOutputStream escritor = new DataOutputStream(stkCliente.getOutputStream());
-        ObjectInputStream lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());;
+        
+        ObjectOutputStream escritor = new ObjectOutputStream(stkCliente.getOutputStream());
+        ObjectInputStream lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
         BigInteger g = null;
         BigInteger p = null;
         BigInteger gx = null;
+        Random random = new Random();
+        BigInteger k = null;
+        int y = random.nextInt(15);
         byte[] iv;
-        //ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkCliente.getOutputStream());
-        //DataInputStream lector = new DataInputStream(stkCliente.getInputStream());
 		
 		String reto = cliente.getReto().toString();
-		escritor.writeUTF("SECURE INIT," + reto);
+		escritor.writeObject("SECURE INIT," + reto);
 		
 		while (estado <= 10 && estado != -1) {
 			switch (estado) {
 			case 1:
 				byte[] arregloBytes = (byte[]) lectorObjetos.readObject();
 				String respuesta = Firmas.verifyFirmaSHA256(cliente.getPublica(),arregloBytes, reto);
-				escritor.writeUTF(respuesta);
+				escritor.writeObject(respuesta);
 				estado++;
 				break;
 				
@@ -63,13 +67,16 @@ public class ProtocoloCliente {
 				byte[] dhFirmado = (byte[]) lectorObjetos.readObject();	
 				String prueba = String.valueOf(g)+ String.valueOf(p) + String.valueOf(gx);
 				respuesta = Firmas.verifyFirmaSHA256(cliente.getPublica(),dhFirmado, prueba);
-				System.out.println("RESPUESTA DH  +" + respuesta);
-				escritor.writeUTF(respuesta);
+				escritor.writeObject(respuesta);
+				BigInteger gy = cliente.generarDatosGY(p, g, y);
+				escritor.writeObject(gy);
+				k = cliente.calcularK(gx, y, p);
+				System.out.println("El k es en el cliente: " + k);
 				estado++;
 				break;
 				
 			case 7:
-
+				estado++;
 				break;
 			case 8:
 

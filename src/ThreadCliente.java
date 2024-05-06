@@ -70,7 +70,13 @@ public class ThreadCliente extends Thread {
     	return this.publica;
     }
     
+    public BigInteger generarDatosGY(BigInteger p, BigInteger g, int y) {
+        return g.pow(y).mod(p);
+    }
     
+    public BigInteger calcularK(BigInteger gx, int y, BigInteger  p) {
+    	return gx.pow(y).mod(p);
+    }
 	public void run() {
 		try {
 			ProtocoloCliente.procesar(numToComunicate, this, stkCliente);
