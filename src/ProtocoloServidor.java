@@ -14,8 +14,7 @@ public class ProtocoloServidor {
 
 	public static void procesar(Socket stkServer, Servidor servidor) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException{
 			DataInputStream lector;
-			int estado = 1;			
-	        //
+			int estado = 1;
 	        DataOutputStream escritor = new DataOutputStream(stkServer.getOutputStream());
             //ObjectInputStream lectorObjetos = new ObjectInputStream(stkServer.getInputStream());
             ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkServer.getOutputStream());
@@ -26,10 +25,8 @@ public class ProtocoloServidor {
 					lector = new DataInputStream(stkServer.getInputStream());
 					String inputLine = lector.readUTF();
 					String[] data = inputLine.split(",");
-					System.out.println(data[1]);
 					byte[] retoFirmado = Firmas.firmarSHA256(data[1], servidor.getPrivada());
 					escritorObjetos.writeObject(retoFirmado);
-					lector.close();
 					estado++;
 					break;
 					
@@ -37,16 +34,18 @@ public class ProtocoloServidor {
 					lector = new DataInputStream(stkServer.getInputStream());
 					inputLine = lector.readUTF();
 					if(inputLine.equalsIgnoreCase("OK")) {
-						System.out.println("OK validacion de firma en el SV");
-	                    BigInteger p = DHParameters.getP();
+						
 	                    BigInteger g = DHParameters.getG();
+	                    escritorObjetos.writeObject(g);
+	                    
+	                    BigInteger p = DHParameters.getP();
+	                    escritorObjetos.writeObject(p);
+	                    
+	                    BigInteger gx = servidor.generarDatosGX(p, g);
+	                    escritorObjetos.writeObject(gx);
+	                    
 	                    byte[] iv = DHParameters.generarIV();
-
-	                    System.out.println("generando datos DH");
-	                    String infoDH = servidor.generarDatosDH(p, g);
-	                    System.out.println("Datos DH: " + infoDH);
-
-	                    System.out.println("Cifrando datos DH");
+	                    escritorObjetos.writeObject(iv);
 					}
 
 					break;

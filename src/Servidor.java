@@ -45,18 +45,8 @@ public class Servidor extends Thread{
 		return privada;
 	}
 	
-    public String generarDatosDH(BigInteger p, BigInteger g) {
-
-        System.out.println("valor de x: " + this.x);
-        BigInteger gALaX = g.pow(this.x);
-        System.out.println("Calculado");
-        String gToThePowerX = gALaX.toString();
-
-        String data = p + "$";
-        data += g;
-        data += "$";
-        data += gToThePowerX;
-        return data;
+    public BigInteger generarDatosGX(BigInteger p, BigInteger g) {
+        return g.pow(this.x);
     }
 	
 	public void run() {
