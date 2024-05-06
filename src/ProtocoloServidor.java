@@ -5,23 +5,29 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.net.Socket;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 public class ProtocoloServidor {
 
-	public static void procesar(Socket stkServer, Servidor servidor) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, ClassNotFoundException{
+	public static void procesar(Socket stkServer, Servidor servidor) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, ClassNotFoundException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, InvalidAlgorithmParameterException{
 			int estado = 1;
             ObjectInputStream lector = new ObjectInputStream(stkServer.getInputStream());
             ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkServer.getOutputStream());
             BigInteger p = null;
-            String[] keys;
+            String[] keys = null;
             String login = "user";
             byte[] loginCifrado = null;
             byte[] passCifrado = null;
             String password = "pass";
+            byte[] iv = null;
             
 			
 			while(estado <= 8 && estado != -1) {
@@ -49,7 +55,7 @@ public class ProtocoloServidor {
 	                    BigInteger gx = servidor.generarDatosGX(p, g);
 	                    escritorObjetos.writeObject(gx);
 	                    
-	                    byte[] iv = DHParameters.generarIV();
+	                    iv = DHParameters.generarIV();
 	                    escritorObjetos.writeObject(iv);
 	                    
 	                    byte[] dhFirmado = Firmas.firmarSHA256(String.valueOf(g)+ String.valueOf(p) + String.valueOf(gx) , servidor.getPrivada());
@@ -81,8 +87,8 @@ public class ProtocoloServidor {
 					
 				case 6:
 					passCifrado = (byte[]) lector.readObject();
-					System.out.println("Llegó el password cifrado");
-					//TO DO: descifrar
+					String loginDescifrado = Cifrado.descifrarPKCS5(keys[0], iv, loginCifrado);
+					String passDescifrado = Cifrado.descifrarPKCS5(keys[0], iv, passCifrado);
 					estado++;
 					break;
 				case 7:

@@ -19,6 +19,17 @@ public class Cifrado {
 	    byte[] cifrate = cifrador.doFinal(toCifrate.getBytes()); 
 	    return cifrate;
 	}
+
+	public static String descifrarPKCS5(String eK, byte[] iv, byte[] toDescifrate) throws IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+		IvParameterSpec ivCorrecto = new IvParameterSpec(iv);
+        Cipher cifrador = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec kK = new SecretKeySpec(eK.getBytes(), "AES");
+        cifrador.init(Cipher.DECRYPT_MODE, kK, ivCorrecto);
+        byte[] charDescifrate = cifrador.doFinal(toDescifrate);
+        String response = new String(charDescifrate); 
+        return response;
+	}
 }
+
 
 
