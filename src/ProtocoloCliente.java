@@ -3,15 +3,20 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.net.Socket;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Random;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 public class ProtocoloCliente {
 
 	public static void procesar(int numToComunicate, ThreadCliente cliente, Socket stkCliente)
-			throws IOException, ClassNotFoundException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+			throws IOException, ClassNotFoundException, InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		
 		int estado = 1;
         
@@ -22,9 +27,9 @@ public class ProtocoloCliente {
         BigInteger gx = null;
         Random random = new Random();
         BigInteger k = null;
-        String[] keys;
+        String[] keys = null;
         int y = random.nextInt(15);
-        byte[] iv;
+        byte[] iv = null;
 		
 		String reto = cliente.getReto().toString();
 		escritor.writeObject("SECURE INIT," + reto);
@@ -67,12 +72,23 @@ public class ProtocoloCliente {
 				escritor.writeObject(gy);
 				k = cliente.calcularK(gx, y, p);
 				keys = Digest.digWithSHA512(k);
+				
 				estado++;
 				break;
 				
 			case 7:
+				String input = (String) lectorObjetos.readObject();
+				if(input.equalsIgnoreCase("CONTINUAR")) {
+					
+					byte[] loginCifrado = Cifrado.cifrarPKCS5(keys[0], iv, "user");
+					escritor.writeObject(loginCifrado);
+					
+					byte[] passCifrado = Cifrado.cifrarPKCS5(keys[0], iv, "pass");
+					escritor.writeObject(passCifrado);
+				}
 				estado++;
 				break;
+				
 			case 8:
 
 				break;

@@ -18,6 +18,11 @@ public class ProtocoloServidor {
             ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkServer.getOutputStream());
             BigInteger p = null;
             String[] keys;
+            String login = "user";
+            byte[] loginCifrado = null;
+            byte[] passCifrado = null;
+            String password = "pass";
+            
 			
 			while(estado <= 8 && estado != -1) {
 				
@@ -56,7 +61,6 @@ public class ProtocoloServidor {
 				case 3:
 					inputLine = (String) lector.readObject();
 					if(inputLine.equalsIgnoreCase("OK")) {
-					System.out.println("Llego bien");
 					estado++;
 					}	
 					//TODO: Cerrar con error
@@ -66,13 +70,20 @@ public class ProtocoloServidor {
 					BigInteger gy = (BigInteger) lector.readObject();
 					BigInteger k = servidor.calcularK(gy, p);
 					keys = Digest.digWithSHA512(k);
+					escritorObjetos.writeObject("CONTINUAR");
 					estado++;
 					break;
+					
 				case 5:
-
+					loginCifrado = (byte[]) lector.readObject();
+					estado++;
 					break;
+					
 				case 6:
-
+					passCifrado = (byte[]) lector.readObject();
+					System.out.println("Llegó el password cifrado");
+					//TO DO: descifrar
+					estado++;
 					break;
 				case 7:
 

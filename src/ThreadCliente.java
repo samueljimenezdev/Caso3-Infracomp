@@ -10,7 +10,13 @@ import java.net.Socket;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Random;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -22,16 +28,8 @@ public class ThreadCliente extends Thread {
 	private Socket stkCliente= null;
 	private int id;
 	private int numToComunicate;
-	
     static Random aleatorio = new Random();
-    private static final String valid_char = String.join("", 
-    	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 
-    	    "abcdefghijklmnopqrstuvwxyz", 
-    	    "0123456789"
-    	);
     private Long reto;
-    private String login;
-    private String contrasenia;
 	private PublicKey publica;
 	
 	public ThreadCliente(Socket pSocket, int pId, int numToComunicate, PublicKey publica) {
@@ -40,23 +38,8 @@ public class ThreadCliente extends Thread {
 		this.numToComunicate = numToComunicate;
         SecureRandom random = new SecureRandom();
         this.reto = (long) random.nextInt(10000);
-        this.contrasenia = generateRandomString(8);
         this.publica = publica;
 	}
-	
-    public static String generateRandomString(int length) {
-        Random random = new Random();
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(valid_char.length());
-            char randomChar = valid_char.charAt(randomIndex);
-            stringBuilder.append(randomChar);
-        }
-
-        return stringBuilder.toString();
-    
-    }
 	
     public Long getReto() {
         return this.reto;
@@ -82,7 +65,7 @@ public class ThreadCliente extends Thread {
 			ProtocoloCliente.procesar(numToComunicate, this, stkCliente);
 			stkCliente.close();
 			
-		}catch(IOException | InvalidKeyException | ClassNotFoundException | SignatureException | NoSuchAlgorithmException e) {
+		}catch(IOException | InvalidKeyException | ClassNotFoundException | SignatureException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
 			e.printStackTrace();
 		}
 	}
