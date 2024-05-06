@@ -19,7 +19,7 @@ public class ProtocoloCliente {
 			throws IOException, ClassNotFoundException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
 		int estado = 1;
         DataOutputStream escritor = new DataOutputStream(stkCliente.getOutputStream());
-        ObjectInputStream lectorObjetos;
+        ObjectInputStream lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());;
         BigInteger g;
         BigInteger p;
         BigInteger gx;
@@ -33,7 +33,6 @@ public class ProtocoloCliente {
 		while (estado <= 10 && estado != -1) {
 			switch (estado) {
 			case 1:
-				lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
 				byte[] arregloBytes = (byte[]) lectorObjetos.readObject();
 				String respuesta = Firmas.verifyFirmaSHA256(cliente.getPublica(),arregloBytes, reto);
 				escritor.writeUTF(respuesta);
@@ -41,25 +40,24 @@ public class ProtocoloCliente {
 				break;
 				
 			case 2:
-				lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
 				g = (BigInteger) lectorObjetos.readObject();
+                System.out.println("g cl: " + g);
 				estado++;
 				break;
 				
 			case 3:
-				lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
 				p = (BigInteger) lectorObjetos.readObject();
+				System.out.println("p cl: " + p);
 				estado++;
 				break;
 				
 			case 4:
-				lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
 				gx = (BigInteger) lectorObjetos.readObject();
+				System.out.println("gx cl: " + gx);
 				estado++;
 				break;
 			
 			case 5:
-				lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
 				iv = (byte[]) lectorObjetos.readObject();
 				estado++;
 				System.out.println("Llego correctamente iv");
@@ -81,7 +79,6 @@ public class ProtocoloCliente {
 
 				break;
 			}
-			estado++;
 		}
 
 	}

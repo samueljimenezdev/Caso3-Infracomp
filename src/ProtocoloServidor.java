@@ -36,12 +36,15 @@ public class ProtocoloServidor {
 					if(inputLine.equalsIgnoreCase("OK")) {
 						
 	                    BigInteger g = DHParameters.getG();
+	                    System.out.println("g sv: " + g);
 	                    escritorObjetos.writeObject(g);
 	                    
 	                    BigInteger p = DHParameters.getP();
+	                    System.out.println("p sv: " + p);
 	                    escritorObjetos.writeObject(p);
 	                    
 	                    BigInteger gx = servidor.generarDatosGX(p, g);
+	                    System.out.println("gx sv: " + gx);
 	                    escritorObjetos.writeObject(gx);
 	                    
 	                    byte[] iv = DHParameters.generarIV();
