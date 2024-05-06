@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyPair;
@@ -43,6 +44,20 @@ public class Servidor extends Thread{
 	public PrivateKey getPrivada() {
 		return privada;
 	}
+	
+    public String generarDatosDH(BigInteger p, BigInteger g) {
+
+        System.out.println("valor de x: " + this.x);
+        BigInteger gALaX = g.pow(this.x);
+        System.out.println("Calculado");
+        String gToThePowerX = gALaX.toString();
+
+        String data = p + "$";
+        data += g;
+        data += "$";
+        data += gToThePowerX;
+        return data;
+    }
 	
 	public void run() {
 		boolean continuar = true;

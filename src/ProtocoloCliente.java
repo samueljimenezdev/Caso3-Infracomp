@@ -31,7 +31,9 @@ public class ProtocoloCliente {
 			case 1:
 				ObjectInputStream lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
 				byte[] arregloBytes = (byte[]) lectorObjetos.readObject();
-				Firmas.verifyFirmaSHA256(cliente.getPublica(),arregloBytes, reto);
+				String respuesta = Firmas.verifyFirmaSHA256(cliente.getPublica(),arregloBytes, reto);
+				escritor.writeUTF(respuesta);
+				estado++;
 				break;
 			case 2:
 

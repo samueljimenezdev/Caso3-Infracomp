@@ -3,6 +3,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -10,23 +12,42 @@ import java.security.SignatureException;
 
 public class ProtocoloServidor {
 
-	public static void procesar(DataInputStream pIn, DataOutputStream pOut, Servidor servidor, ObjectInputStream pOIn, ObjectOutputStream pOOut) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException{
-
+	public static void procesar(Socket stkServer, Servidor servidor) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException{
+			DataInputStream lector;
 			int estado = 1;			
+	        //
+	        DataOutputStream escritor = new DataOutputStream(stkServer.getOutputStream());
+            //ObjectInputStream lectorObjetos = new ObjectInputStream(stkServer.getInputStream());
+            ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkServer.getOutputStream());
 			
 			while(estado <= 8 && estado != -1) {
 				switch (estado){
 				case 1:
-					System.out.println("Entro a caso 1 sv");
-					String inputLine = pIn.readUTF();
-					System.out.println(inputLine);
+					lector = new DataInputStream(stkServer.getInputStream());
+					String inputLine = lector.readUTF();
 					String[] data = inputLine.split(",");
+					System.out.println(data[1]);
 					byte[] retoFirmado = Firmas.firmarSHA256(data[1], servidor.getPrivada());
-					pOOut.writeObject(retoFirmado);
+					escritorObjetos.writeObject(retoFirmado);
+					lector.close();
 					estado++;
 					break;
 					
 				case 2:
+					lector = new DataInputStream(stkServer.getInputStream());
+					inputLine = lector.readUTF();
+					if(inputLine.equalsIgnoreCase("OK")) {
+						System.out.println("OK validacion de firma en el SV");
+	                    BigInteger p = DHParameters.getP();
+	                    BigInteger g = DHParameters.getG();
+	                    byte[] iv = DHParameters.generarIV();
+
+	                    System.out.println("generando datos DH");
+	                    String infoDH = servidor.generarDatosDH(p, g);
+	                    System.out.println("Datos DH: " + infoDH);
+
+	                    System.out.println("Cifrando datos DH");
+					}
 
 					break;
 				case 3:
@@ -50,14 +71,11 @@ public class ProtocoloServidor {
 				}
 				
 			}
-		}
-	
-    private static byte[] resolverReto(Long reto, PrivateKey privada) {
-        byte[] retoCifrado = CifradoAsimetrico.cifrarLlave(privada, String.valueOf(reto));
-        return retoCifrado;
-    }
-
-	
+			escritor.close();
+			//lector.close();
+			//lectorObjetos.close();
+			escritorObjetos.close();	
+	}
 }
 
  

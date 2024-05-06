@@ -9,30 +9,20 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ThreadServidor extends Thread{
-	private Socket stkCliente= null;
+	private Socket stkServer= null;
 	private Servidor servidor;
 	int id;
 	
 	public ThreadServidor(Socket pSocket, int pId, Servidor servidor) {
-		this.stkCliente = pSocket;
+		this.stkServer = pSocket;
 		this.id = pId;
 		this.servidor = servidor;
 	}
 	
 	public void run(){
-
 		try {
-	        DataInputStream lector = new DataInputStream(stkCliente.getInputStream());; 
-	        DataOutputStream escritor = new DataOutputStream(stkCliente.getOutputStream());
-            ObjectInputStream lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());
-            ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkCliente.getOutputStream());
-            System.out.println("PRUEBAA");
-			ProtocoloServidor.procesar( lector, escritor, this.servidor, lectorObjetos, escritorObjetos);
-			escritor.close();
-			lector.close();
-			lectorObjetos.close();
-			escritorObjetos.close();
-			stkCliente.close();
+			ProtocoloServidor.procesar( this.stkServer, this.servidor);
+			stkServer.close();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

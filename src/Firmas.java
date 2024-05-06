@@ -17,13 +17,17 @@ public class Firmas {
 
     }
     
-    public static Boolean verifyFirmaSHA256 (PublicKey publica, byte[] arregloBytes, String reto) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException{
-        
+    public static String verifyFirmaSHA256 (PublicKey publica, byte[] arregloBytes, String reto) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException{
+    	String[] data = reto.split(",");
         Signature firma = Signature.getInstance("SHA256withRSA");
         firma.initVerify(publica);
-        firma.update(reto.getBytes());
-        boolean isVerified = firma.verify(arregloBytes);
-        System.out.println("Verificacion de la firma: " + isVerified);
-        return isVerified;
+        firma.update(data[1].getBytes());
+        boolean isValid = firma.verify(arregloBytes);
+        if (isValid) {
+        	return "OK";
+        }else {
+        	return "ERROR";
+        }
     }
+
 }
