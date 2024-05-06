@@ -17,6 +17,7 @@ public class ProtocoloServidor {
             ObjectInputStream lector = new ObjectInputStream(stkServer.getInputStream());
             ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkServer.getOutputStream());
             BigInteger p = null;
+            String[] keys;
 			
 			while(estado <= 8 && estado != -1) {
 				
@@ -64,7 +65,7 @@ public class ProtocoloServidor {
 				case 4:
 					BigInteger gy = (BigInteger) lector.readObject();
 					BigInteger k = servidor.calcularK(gy, p);
-					System.out.println("El k es en el sv: " + k);
+					keys = Digest.digWithSHA512(k);
 					estado++;
 					break;
 				case 5:

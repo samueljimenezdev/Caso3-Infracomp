@@ -1,16 +1,10 @@
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Random;
 
@@ -28,6 +22,7 @@ public class ProtocoloCliente {
         BigInteger gx = null;
         Random random = new Random();
         BigInteger k = null;
+        String[] keys;
         int y = random.nextInt(15);
         byte[] iv;
 		
@@ -71,7 +66,7 @@ public class ProtocoloCliente {
 				BigInteger gy = cliente.generarDatosGY(p, g, y);
 				escritor.writeObject(gy);
 				k = cliente.calcularK(gx, y, p);
-				System.out.println("El k es en el cliente: " + k);
+				keys = Digest.digWithSHA512(k);
 				estado++;
 				break;
 				
@@ -93,18 +88,6 @@ public class ProtocoloCliente {
 	}
 
 
-	public static String verificarReto(byte[] retoCifrado, PublicKey llavePublica, Long reto) {
 
-		byte[] descifrado = CifradoAsimetrico.descifrarLlave(llavePublica, retoCifrado);
-
-		String retoDescifrado = new String(descifrado, StandardCharsets.UTF_8);
-		String retoString = String.valueOf(reto);
-
-		if (retoDescifrado.equals(retoString)) {
-			return "OK";
-		} else {
-			return "ERROR";
-		}
-	}
 
 }
