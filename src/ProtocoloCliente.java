@@ -30,6 +30,7 @@ public class ProtocoloCliente {
         String[] keys = null;
         int y = random.nextInt(15);
         byte[] iv = null;
+        byte[] respuestaCifrada = null;
 		
 		String reto = cliente.getReto().toString();
 		escritor.writeObject("SECURE INIT," + reto);
@@ -101,13 +102,25 @@ public class ProtocoloCliente {
 				break;
 				
 			case 9:
-
+				respuestaCifrada = (byte[]) lectorObjetos.readObject();
+				estado++;
 				break;
+				
 			case 10:
-
+				String hMacRespuesta = (String) lectorObjetos.readObject();
+				String consultaDescifrada = Cifrado.descifrarPKCS5(keys[0], iv, respuestaCifrada);
+				String hMac = HMac.doHMac(keys[1], consultaDescifrada);
+				
+				if(hMac.equalsIgnoreCase(hMacRespuesta)) {
+					System.out.println("El servidor respondió: " + consultaDescifrada);
+				}
+				estado++;
 				break;
 			}
 		}
+		escritor.close();
+		lectorObjetos.close();
+		stkCliente.close();
 
 	}
 

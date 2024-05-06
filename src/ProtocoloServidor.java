@@ -110,16 +110,21 @@ public class ProtocoloServidor {
 					String hMac = HMac.doHMac(keys[1], consultaDescifrada);
 					
 					if(hMac.equalsIgnoreCase(hMacConsulta)) {
-						System.out.println("CORRECTA VERIFICACION HMAC");
+						int valueOfConsulta = Integer.valueOf(consultaDescifrada);
+						int numToComunicate = valueOfConsulta+ 1;
+						byte[] respuestaCifrada = Cifrado.cifrarPKCS5(keys[0], iv, String.valueOf(numToComunicate));
+						escritorObjetos.writeObject(respuestaCifrada);
+						String hMacRespuesta = HMac.doHMac(keys[1], String.valueOf(numToComunicate));
+						escritorObjetos.writeObject(hMacRespuesta); 
 					}
 					estado++;
 					break;
 				}
 				
 			}
-			//lector.close();
-			//lectorObjetos.close();
-			escritorObjetos.close();	
+			escritorObjetos.close();
+			stkServer.close();
+			lector.close();
 	}
 }
 

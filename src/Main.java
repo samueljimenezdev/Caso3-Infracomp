@@ -95,11 +95,10 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Main main = new Main(scanner);
         int opcion;
-        do{
             main.showMenuPrincipal();
             opcion = main.getOpcion();
             main.doOpciones(opcion);
-        }while(opcion != 3);
+
 
         scanner.close();
     }
