@@ -18,10 +18,9 @@ public class Firmas {
     }
     
     public static String verifyFirmaSHA256 (PublicKey publica, byte[] arregloBytes, String reto) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException{
-    	String[] data = reto.split(",");
         Signature firma = Signature.getInstance("SHA256withRSA");
         firma.initVerify(publica);
-        firma.update(data[1].getBytes());
+        firma.update(reto.getBytes());
         boolean isValid = firma.verify(arregloBytes);
         if (isValid) {
         	return "OK";

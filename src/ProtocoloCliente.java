@@ -20,15 +20,15 @@ public class ProtocoloCliente {
 		int estado = 1;
         DataOutputStream escritor = new DataOutputStream(stkCliente.getOutputStream());
         ObjectInputStream lectorObjetos = new ObjectInputStream(stkCliente.getInputStream());;
-        BigInteger g;
-        BigInteger p;
-        BigInteger gx;
+        BigInteger g = null;
+        BigInteger p = null;
+        BigInteger gx = null;
         byte[] iv;
         //ObjectOutputStream escritorObjetos = new ObjectOutputStream(stkCliente.getOutputStream());
         //DataInputStream lector = new DataInputStream(stkCliente.getInputStream());
 		
-		String reto = "SECURE INIT,"+cliente.getReto().toString();
-		escritor.writeUTF(reto);
+		String reto = cliente.getReto().toString();
+		escritor.writeUTF("SECURE INIT," + reto);
 		
 		while (estado <= 10 && estado != -1) {
 			switch (estado) {
@@ -41,31 +41,33 @@ public class ProtocoloCliente {
 				
 			case 2:
 				g = (BigInteger) lectorObjetos.readObject();
-                System.out.println("g cl: " + g);
 				estado++;
 				break;
 				
 			case 3:
 				p = (BigInteger) lectorObjetos.readObject();
-				System.out.println("p cl: " + p);
 				estado++;
 				break;
 				
 			case 4:
 				gx = (BigInteger) lectorObjetos.readObject();
-				System.out.println("gx cl: " + gx);
 				estado++;
 				break;
 			
 			case 5:
 				iv = (byte[]) lectorObjetos.readObject();
 				estado++;
-				System.out.println("Llego correctamente iv");
 				break;
 				
 			case 6:
-
+				byte[] dhFirmado = (byte[]) lectorObjetos.readObject();	
+				String prueba = String.valueOf(g)+ String.valueOf(p) + String.valueOf(gx);
+				respuesta = Firmas.verifyFirmaSHA256(cliente.getPublica(),dhFirmado, prueba);
+				System.out.println("RESPUESTA DH  +" + respuesta);
+				escritor.writeUTF(respuesta);
+				estado++;
 				break;
+				
 			case 7:
 
 				break;
